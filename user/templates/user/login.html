@@ -1,0 +1,40 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+    <div class="container-fluid w-100 vh-100 d-flex align-items-center justify-content-center">
+
+        <div class="form-container w-50 h-50">
+            <form method="POST" action="" class="row g-2">
+                {% csrf_token %}
+        
+                <h3>Welcome Back!</h3>
+    
+                <div class="col-12">
+                    <input class="form-control form-control mb-2" name="username" type="text" placeholder="Enter Username" required>
+                </div>
+                <div class="col-12">
+                    <input class="form-control form-control mb-2" name="password" type="password" placeholder="Enter Password" required>
+                </div>
+                <div class="col-3">
+                    <a href="{% url 'signup' %}">Sign Up</a>
+                </div>
+                <div class="col-auto ms-auto">
+                    <button type="submit" class="btn btn-primary">LOGIN</button>
+                </div>
+            </form>
+
+            {% if messages %}
+                <div class="alert alert-danger">
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+{% endblock %}

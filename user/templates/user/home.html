@@ -1,0 +1,237 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div class="container-fluid d-flex align-items-start justify-content-center w-80 vh-75">
+
+    <div class="container-fluid w-50 h-100">
+        <h1>Available Stocks</h1>
+        <table class="table table-bordered table-hover">
+            <thead class="table table-light">
+                <tr>
+                    <th class="table-primary" scope="col">Stock</th>
+                    <th class="table-primary" scope="col">Price (PHP)</th>
+                    <th class="table-primary" scope="col">Quantity</th>
+                    <th class="table-primary" scope="col"></th>
+                </tr>
+                </thead>
+                <tbody id="stock">
+
+                </tbody>
+        </table>
+    </div>
+
+    <div class="container-fluid w-50 h-100">
+        <div class="my-stocks w-100 h-100 d-flex align-items-center justify-content-between">
+            <h1>My Stocks</h1>
+            <h6 id="total-investment"></h6>
+        </div>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th class="table-warning" scope="col">Stock</th>
+                    <th class="table-warning" scope="col">Current Price (PHP)</th>
+                    <th class="table-warning" scope="col">Quantity</th>
+                    <th class="table-light" scope="col">Purchase Price (PHP)</th>
+                </tr>
+                </thead>
+                <tbody id="mystock">
+
+                </tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="buyFormModal" aria-hidden="true" aria-labelledby="buyFormModalToggleLabel" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="buyFormModalToggleLabel">Buy Form</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form action="{% url 'buyStock' %}" method="POST" class="row g-2">
+                    {% csrf_token %}
+
+                    <div class="col-12">
+                        <label for="stockname">Stock Name</label>
+                        <input class="form-control form-control mb-2" id="stockname" name="stock_name" type="text" value="" aria-label="readonly input example" readonly>
+                    </div>
+                    <div class="col-4">
+                        <label for="price">Price</label>
+                        <input class="form-control form-control-sm mb-2" id="price" name="price" type="text" value="" aria-label="readonly input example" readonly>
+                    </div>
+                    <div class="col-4">
+                        <label for="available">Quantity</label>
+                        <input class="form-control form-control-sm mb-2" id="avaible" type="number" value="" aria-label="readonly input example" readonly>
+                    </div>
+                    <div class="col-4">
+                        <label for="quantity">Purchase</label>
+                        <input class="form-control form-control-sm  mb-2" id="quantity" name="purchase_qty" type="number" placeholder="Quantity" aria-label=".form-control-sm example" onkeyup="setTotal(this.value)">
+                    </div>
+                    <div class="col-2 ms-auto">
+                        <label for="total">Total: </label>
+                    </div>
+                    <div class="col-3">
+                        <input class="form-control form-control-sm mb-2" id="total" name="total" type="number" value="" aria-label="readonly input example" readonly>
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">BUY</button>
+                </form>
+
+                {% if messages %}
+                    <div class="alert alert-danger">
+                        <ul class="messages">
+                            {% for message in messages %}
+                            <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      
+    <div class="modal fade" id="stockDataModal" aria-hidden="true" aria-labelledby="stockDataModalToggleLabel" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="stockDataModalToggleLabel">Stock Data</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <table class="table table-bordered table-hover">
+                    <thead class="table table-light">
+                        <tr>
+                            <th class="table-primary" scope="col">Stock</th>
+                            <th class="table-primary" scope="col">Price (PHP)</th>
+                            <th class="table-primary" scope="col">Quantity</th>
+                        </tr>
+                        </thead>
+                        <tbody id="stock-data">
+
+                        </tbody>
+                </table>
+                
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+    let stocksContainer = document.getElementById('stock')
+
+    let getStocks = async () => {
+        let response = await fetch('api/stocks/')
+        let stocks = await response.json()
+
+        for (let i = 0; i < stocks.length; i++) {
+            let stock = stocks[i]
+
+            let row = `<tr id='${i}' onclick='getStockData()'  data-bs-toggle="modal" href="#stockDataModal">
+                            <td class="row-data" onclick=''>${stock.name}</td>
+                            <td class="row-data">${stock.price}</td>
+                            <td class="row-data">${stock.quantity}</td>
+                            <td class="align-middle"><a class="btn btn-primary btn-sm" data-bs-toggle="modal" href="#buyFormModal" role="button" onclick='buyForm()'>BUY</a></td>
+                        </tr>`
+
+            stocksContainer.innerHTML += row
+        }
+        
+    }
+
+    let myStocksContainer = document.getElementById('mystock')
+    var total = 0;
+
+    let getMyStocks = async () => {
+        let response = await fetch('api/mystocks/')
+        let stocks = await response.json()
+
+        for (let i = 0; i < stocks.length; i++) {
+            let stock = stocks[i]
+            
+            let row = `<tr>
+                            <td>${stock.stock.name}</td>
+                            <td>${stock.stock.price}</td>
+                            <td>${stock.quantity}</td>
+                            <td>${stock.purchase_price}</td>
+                        </tr>`
+
+            total += stock.quantity * stock.purchase_price;
+
+            myStocksContainer.innerHTML += row
+        }
+        
+        document.getElementById('total-investment').innerHTML = 'Total (PHP): <span style="color: blue;">' + total.toString() + '</span>'
+        
+    }
+
+    let stockData = document.getElementById('stock-data')
+
+    let getStockData = async () => {
+        stockData.innerHTML = ''
+        
+        var rowId = event.target.parentNode.id
+        var data = document.getElementById(rowId).querySelectorAll(".row-data"); 
+
+        var stock_name = data[0].innerHTML;
+        
+        let response = await fetch('api/stock/data/' + stock_name + '/')
+        let stock_data = await response.json()
+        console.log(stock_data)
+
+        for (let i = 0; i < stock_data.length; i++) {
+            let stock_change = stock_data[i]
+            
+            let row = `<tr>
+                            <td>${stock_change.name}</td>
+                            <td>${stock_change.price}</td>
+                            <td>${stock_change.quantity}</td>
+                        </tr>`
+
+            stockData.innerHTML += row
+        }  
+        
+    }
+
+    function buyForm() {
+        var rowId = event.target.parentNode.parentNode.id;
+        var data = document.getElementById(rowId).querySelectorAll(".row-data"); 
+
+        var stock = data[0].innerHTML;
+        var price = data[1].innerHTML;
+        var quantity = data[2].innerHTML;
+        
+       var stockname =  document.getElementById('stockname');
+       stockname.value = stock;
+       var stockprice =  document.getElementById('price');
+       stockprice.value = price;
+       var stockquantity =  document.getElementById('avaible');
+       stockquantity.value = quantity;
+    }
+
+    function setTotal(quantity) {
+        var stockprice =  document.getElementById('price');
+        var total_price = stockprice.value * quantity;
+        
+        var total =  document.getElementById('total');
+        total.value = parseFloat(total_price).toFixed(2);
+    }
+
+    getStocks()
+    getMyStocks()
+
+</script>
+
+
+{% endblock %}

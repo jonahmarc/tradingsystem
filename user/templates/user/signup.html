@@ -1,0 +1,48 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+    <div class="container-fluid w-100 vh-100 d-flex align-items-center justify-content-center">
+
+        <div class="form-container w-50 h-40">
+            <form method="POST" action="" class="row g-2">
+                {% csrf_token %}
+        
+                <h3>Register To Start Trading!</h3>
+
+                <div class="col-12">
+                    <input class="form-control form-control mb-2" name="username" type="text" placeholder="Username" required>
+                </div>
+                <div class="col-6">
+                    <input class="form-control form-control mb-2" name="first_name" type="text" placeholder="First Name">
+                </div>
+                <div class="col-6">
+                    <input class="form-control form-control mb-2" name="last_name" type="text" placeholder="Last Name">
+                </div>
+                <div class="col-12">
+                    <input class="form-control form-control mb-2" name="email" type="email" placeholder="Email">
+                </div>
+                <div class="col-12">
+                    <input class="form-control form-control mb-2" name="password1" type="password" placeholder="Enter Password" required>
+                </div>
+                <div class="col-12">
+                    <input class="form-control form-control mb-2" name="password2" type="password" placeholder="Enter Password Again" required>
+                </div>
+                <div class="col-3">
+                    <a href="{% url 'login' %}">Login</a>
+                </div>
+                <div class="col-auto ms-auto">
+                    <button type="submit" class="btn btn-primary">SIGN UP</button>
+                </div>
+            </form>
+
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+{% endblock %}

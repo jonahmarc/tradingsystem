@@ -1,0 +1,80 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div class="container-fluid d-flex align-items-start justify-content-center w-80 vh-75">
+
+    <div class="container-fluid w-50 h-100">
+        <h1>Stocks Bought</h1>
+        <table class="table table-bordered">
+            <thead class="table table-light">
+                <tr>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Price (PHP)</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Date</th>
+                </tr>
+                </thead>
+                <tbody id="purchases">
+
+                </tbody>
+        </table>
+    </div>
+
+    <div class="container-fluid w-50 h-100">
+        <h1>Stocks Sold</h1>
+        <table class="table table-bordered">
+            <thead class="table table-light">
+                <tr>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Price (PHP)</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Date</th>
+                </tr>
+                </thead>
+                <tbody id="sold">
+
+                </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+
+    let orderHistoryContainer = document.getElementById('purchases')
+    
+    let url = location.origin
+
+    let getOrderHistory = async () => {
+        let response = await fetch(url + '/api/stocks/purchase/history/')
+        let history = await response.json()
+
+        for (let i = 0; i < history.length; i++) {
+            let purchase = history[i]
+            let date = new Date(purchase.date_ordered).toLocaleString()
+            let row = `<tr>
+                            <td>${purchase.stock_name}</td>
+                            <td>${purchase.price}</td>
+                            <td>${purchase.quantity}</td>
+                            <td>${purchase.total}</td>
+                            <td>${date}</td>
+                        </tr>`
+
+            orderHistoryContainer.innerHTML += row
+        }
+        
+    }
+
+    getOrderHistory()
+
+</script>
+
+
+{% endblock %}
